@@ -1,0 +1,12 @@
+[
+	{
+		"SCREEN_WIDTH" : 1280,
+		"SCREEN_HEIGHT" : 720,
+		"WINDOW_TITLE" : "Enlil Enraged",
+		"SAMPLE_FREQUENCY" : 44100,
+		"NO_CHANNELS": 2,
+		"SAMPLE_SIZE": 2048,
+		"DEFAULT_FONT" : "defaultFont.ttf",
+		"FONT_SIZE" : 12
+	}
+]
