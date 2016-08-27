@@ -307,3 +307,101 @@ SDL_Texture *loadImage( const char *filename , SDL_Renderer *render , SDL_Rect *
 	SDL_FreeSurface( temp );
 	return tempTex;
 }
+/*
+mapConstruct *loadMap(char *mapText, SDL_Texture *floor, SDL_Texture *wall, int *success):
+Loads a map from a JSON file
+
+
+*/
+mapConstruct *loadMap(char *mapText, SDL_Texture *floor, SDL_Texture *wall, int *success)
+{
+	json_t *tempJsonHandle, *mapData;
+	json_error_t errorHandle;
+	char *mapString;
+	int i, j, yPos, xPos;
+	mapConstruct *map = malloc(sizeof(mapConstruct));
+	if(!map)
+	{
+		fprintf(stderr, "loadMap has failed: Unable to allocate memory for MapConstruct\n");
+		*success = FAIL;
+		return NULL;
+	}
+	tempJsonHandle = json_loads( mapText , 0 , &errorHandle );//loads the JSON file into Jansson 
+	if( !tempJsonHandle )
+	{
+		fprintf( stderr , "json_loads has failed : %s \n" , errorHandle.text );
+		*success = FAIL;
+		return NULL;
+	}
+	
+	mapData = json_array_get( tempJsonHandle , 0 );
+	if( !json_is_object(mapData) )//makes sure that what is being opened is actually a JSON object
+	{
+		fprintf( stderr , "json_object_get failed, didn't get an object\n" );
+		*success = FAIL;
+		json_decref( tempJsonHandle );
+		return NULL;
+	}
+	//json_integer_value( json_object_get ( optionsData , "SCREEN_WIDTH" ) );
+	map->xSize = json_integer_value(json_object_get( mapData, "xSize" ));
+	map->ySize = json_integer_value(json_object_get( mapData, "ySize" ));
+	strncpy(mapString,json_string_value(json_object_get( mapData, "MapLayout" )), map->ySize * map->xSize);
+	
+	map->mapDetails = malloc(sizeof(basicEntity *) * map->ySize);
+	xPos = 0;
+	yPos = 0;
+	
+	for(i = 0; i < map->ySize; i++)
+	{
+		xPos = 0;
+		map->mapDetails[i] = malloc(sizeof( basicEntity ) * map->xSize);
+		
+		for(j = 0; j < map->xSize; j++)
+		{
+			map->mapDetails[i][j].rectangle.x = xPos;
+			map->mapDetails[i][j].rectangle.y = yPos;
+			map->mapDetails[i][j].rectangle.w = TILE_SIZE;
+			map->mapDetails[i][j].rectangle.h = TILE_SIZE;
+			map->mapDetails[i][j].type = mapString[(i * map->ySize) + j] - '0';
+			
+			if(map->mapDetails[i][j].type == TILE_WALKABLE)
+			{
+				map->mapDetails[i][j].tileDisplay = floor;
+			}
+			else
+			{
+				map->mapDetails[i][j].tileDisplay = wall;
+			}
+			xPos += TILE_SIZE;
+		}
+		
+		yPos += TILE_SIZE;
+	
+	}
+	return map;
+}
+/*
+basicEntity **loadTiles(int *success):
+Load all of the mapTiles
+
+*/
+
+basicEntity **loadTiles(SDL_Renderer *renderer, int *success)
+{
+	int i;
+	basicEntity **tiles = malloc( sizeof(basicEntity *) * NO_TILES);
+	char filename[1000];
+	for( i = 0; i < NO_LEVELS; i++)
+	{
+		tiles[(i * 2)] = malloc( sizeof( basicEntity) );
+		sprintf( filename, "%s%s_FLOOR.png", SPRITE_DIR, GOD_NAMES[i]);
+		fprintf(stdout, "%s\n", filename);
+		//SDL_Texture *loadImage( const char *filename , SDL_Renderer *render , SDL_Rect *dimen , int *success );
+		tiles[(i *2)]->tileDisplay = loadImage( filename, renderer, &tiles[(i * 2)]->rectangle, success);
+		tiles[(i * 2) + 1] = malloc( sizeof( basicEntity) );
+		sprintf( filename, "%s%s_WALL.png", SPRITE_DIR, GOD_NAMES[i]);
+		//SDL_Texture *loadImage( const char *filename , SDL_Renderer *render , SDL_Rect *dimen , int *success );
+		tiles[(i *2) + 1]->tileDisplay = loadImage( filename, renderer, &tiles[(i * 2) + 1]->rectangle, success);
+	}
+	return tiles;
+}
