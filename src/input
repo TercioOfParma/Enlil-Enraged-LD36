@@ -1,8 +1,0 @@
-﻿
-
-void handleCamera(SDL_Event *events, SDL_Rect *camera)
-{
-
-
-
-}

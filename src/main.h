@@ -11,7 +11,7 @@
 static const char *ERROR_LOG = "errorlog.txt";
 static const char *OPTIONS_FILE = "options.json";
 static const char *GOD_NAMES[4] = { "ENKI", "ISHTAR", "NINURTA", "ENLIL"};
-static const char* ENEMY_NAMES[7] = {"DOG_","ENKIDU_", "ENLIL_", "FEMALE_", "FISHMAN_", "LAMASSU_", "LION_", "MALE_"};
+static const char* ENEMY_NAMES[8] = {"DOG_","ENKIDU_", "ENLIL_", "FEMALE_", "FISHMAN_", "LAMASSU_", "LION_", "MALE_"};
 static const char* WEAPON_NAMES[6] = {"BOW_", "ENLIL_", "JAVELIN_", "SLING_", "SUPERBOW_", "WATER_"};
 static const char *SPRITE_DIR = "Sprites/";
 static const char *ENEMY_FILE = "enemies.json";
@@ -92,7 +92,7 @@ typedef struct
 {
 	basicEntity *base, *head, *weapon, *bullet;
 	int healthPoints, weaponDamage, rateOfFire, noShots, speed, alive;
-	int headOffset, weaponOffset, weaponType, spawnLevel;
+	int headOffsetX , headOffsetY , weaponOffsetX, weaponOffsetY, weaponType, spawnLevel;
 }basicCharacter;
 
 typedef struct
@@ -101,6 +101,14 @@ typedef struct
 	unsigned char hasBow, hasSpear, hasTeleport, hasSuperBow, hasWaterCannon, hasHealthRegen, hasSling, hasJavelin;
 	int bowAmmo, superbowAmmo, waterCannonAmmo, slingAmmo, javelinAmmo;
 }playerCharacter;
+
+typedef struct
+{
+	mapConstruct **maps;
+	basicEntity **allWeapons, **allEnemies, **allTiles;
+	basicCharacter **allEnemyData;
+
+}gameObject;
 
 //===== INIT ======
 char *loadTextFile( const char *filename , int *success );
@@ -116,8 +124,10 @@ mapConstruct *loadMap(char *mapText, SDL_Texture *floor, SDL_Texture *wall, int 
 basicEntity **loadTiles(SDL_Renderer *renderer, int *success);
 basicEntity **loadEnemies(SDL_Renderer *renderer, int *success);
 basicEntity **loadWeapons(SDL_Renderer *renderer, int *success);
-basicCharacter **loadEnemyStats(basicEntity **bodyAndHeads, basicEntity **weaponsAndAmmo, int *success);
+basicCharacter **loadEnemyStats(char *enemyFile, basicEntity **bodyAndHeads, basicEntity **weaponsAndAmmo, int *success);
 basicCharacter *spawnCharacter( mapConstruct *map, basicEntity *body, basicEntity *head, basicEntity *weapon, basicEntity *bullet );
+
+gameObject *loadGame(SDL_Renderer *renderer, int *success);
 //===== DEINIT ======
 void endSDL( SDL_Renderer *render , SDL_Window *screen , TTF_Font *font );
 

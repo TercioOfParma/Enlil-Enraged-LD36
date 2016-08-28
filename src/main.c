@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
 	TTF_Font *mainFont;
 	optionsData opt;
 	mapConstruct *testMap;
-	FILE *errorToFile = freopen(ERROR_LOG, "w", stderr);
-	basicEntity **allTiles, **allEnemies, **allWeapons;
+	//FILE *errorToFile = freopen(ERROR_LOG, "w", stderr);
+	gameObject *construct;
 	playerCharacter *player = malloc( sizeof( playerCharacter ) );
 	SDL_Event events;
 	SDL_Rect cameraRect;
@@ -28,16 +28,10 @@ int main(int argc, char *argv[])
 	succeededInit = SUCCESS;
 	optionsFile = loadTextFile(OPTIONS_FILE, &succeededInit);
 	opt = initOptions( optionsFile, &succeededInit);
-	
 	mainWindow = initSDL(&opt, &succeededInit);
 	mainRenderer = createRenderer(mainWindow, &succeededInit);
 	mainFont = loadFont( &opt, &succeededInit);
-	allTiles = loadTiles(mainRenderer, &succeededInit);
-	allEnemies = loadEnemies(mainRenderer, &succeededInit);
-	allWeapons = loadWeapons(mainRenderer, &succeededInit);
-	levelFile = loadTextFile("ENKI.json", &succeededInit);
-	testMap = loadMap(levelFile, allTiles[0]->tileDisplay, allTiles[1]->tileDisplay, &succeededInit);
-	
+	construct = loadGame(mainRenderer, &succeededInit);
 	cameraRect.w = opt.SCREEN_WIDTH;
 	cameraRect.h = opt.SCREEN_HEIGHT;
 	cameraRect.x = 0;
@@ -57,13 +51,12 @@ int main(int argc, char *argv[])
 			}
 		
 		}
-		drawMap(testMap, mainRenderer,cameraRect, &opt);
+		drawMap(construct->maps[0], mainRenderer,cameraRect, &opt);
 		SDL_RenderPresent(mainRenderer);
 		SDL_RenderClear(mainRenderer);
 		
 	}
 	endSDL(mainRenderer, mainWindow, mainFont);
-	free(testMap);
-	fclose(stderr);
+	free(construct);
 	return 0;
 }

@@ -114,6 +114,7 @@ optionsData initOptions( char *fileContents , int *success )
 	{
 		fprintf( stderr , "json_loads has failed : %s \n" , errorHandle.text );
 		*success = FAIL;
+		json_decref(tempJsonHandle);
 		return tempOpt;
 	}
 	
@@ -122,7 +123,7 @@ optionsData initOptions( char *fileContents , int *success )
 	{
 		fprintf( stderr , "json_object_get failed, didn't get an object\n" );
 		*success = FAIL;
-		json_decref( tempJsonHandle );
+		json_decref(tempJsonHandle);
 		return tempOpt;
 	
 	}
@@ -135,6 +136,7 @@ optionsData initOptions( char *fileContents , int *success )
 	tempOpt.NO_CHANNELS = json_integer_value( json_object_get( optionsData , "NO_CHANNELS" ) );
 	tempOpt.FONT_SIZE = json_integer_value( json_object_get( optionsData , "FONT_SIZE" ) );
 	tempOpt.DEFAULT_FONT = (char *)json_string_value( json_object_get( optionsData , "DEFAULT_FONT" ) );
+	
 	return tempOpt;
 }
 
@@ -339,7 +341,6 @@ mapConstruct *loadMap(char *mapText, SDL_Texture *floor, SDL_Texture *wall, int 
 	{
 		fprintf( stderr , "json_object_get failed, didn't get an object\n" );
 		*success = FAIL;
-		json_decref( tempJsonHandle );
 		return NULL;
 	}
 	//json_integer_value( json_object_get ( optionsData , "SCREEN_WIDTH" ) );
@@ -468,35 +469,99 @@ int i;
 	return tiles;
 }
 
-basicCharacter **loadEnemyStats(basicEntity **bodyAndHeads, basicEntity **weaponsAndAmmo, int *success)
+basicCharacter **loadEnemyStats(char *enemyFile, basicEntity **bodyAndHeads, basicEntity **weaponsAndAmmo, int *success)
 {
-	json_t *tempJsonHandle, *enemyData;
+	json_t *enemyDataFileArray, *enemyData;
 	json_error_t errorHandle;
-	char *enemyFile = loadTextFile(ENEMY_FILE, success);
-	int i, noEnemies;
-	mapConstruct *map = malloc(sizeof(mapConstruct));
-	if(!map)
-	{
-		fprintf(stderr, "loadMap has failed: Unable to allocate memory for MapConstruct\n");
-		*success = FAIL;
-		return NULL;
-	}
-	tempJsonHandle = json_loads( enemyFile , 0 , &errorHandle );//loads the JSON file into Jansson 
-	if( !tempJsonHandle )
+	int i, noEnemies, enemyID, weaponID;
+	basicCharacter **temp;
+	enemyDataFileArray = json_loads(enemyFile, 0, &errorHandle);
+	if( !enemyDataFileArray )
 	{
 		fprintf( stderr , "json_loads has failed : %s \n" , errorHandle.text );
 		*success = FAIL;
 		return NULL;
 	}
 	
-	enemyData = json_array_get( tempJsonHandle , 0 );
+	enemyData = json_array_get( enemyDataFileArray , 0 );
 	if( !json_is_object(enemyData) )//makes sure that what is being opened is actually a JSON object
 	{
 		fprintf( stderr , "json_object_get failed, didn't get an object\n" );
 		*success = FAIL;
-		json_decref( tempJsonHandle );
 		return NULL;
 	}
 	noEnemies = json_integer_value(json_object_get(enemyData, "NO_ENEMIES")) + 1;
+	temp = malloc( sizeof(basicCharacter *) * noEnemies);
+	if(!temp)
+	{
+		fprintf(stderr, "loadEnemyStats has failed: Unable to allocate memory for basicCharacter!\n");
+		*success = FAIL;
+		return NULL;
+	}
+	
+	for(i = 1; i < noEnemies; i++)
+	{
+		temp[i] = malloc(sizeof(basicCharacter));
+		enemyData = json_array_get(enemyDataFileArray, i);
+		if( !json_is_object(enemyData) )//makes sure that what is being opened is actually a JSON object
+		{
+			fprintf( stderr , "json_object_get failed, didn't get an object\n" );
+			*success = FAIL;
+			return NULL;
+		}
+		
+		
+		enemyID = json_integer_value(json_object_get(enemyData, "BODY_ID"));
+		weaponID = json_integer_value(json_object_get(enemyData, "WEAPON_ID"));
+		
+		temp[i]->base = bodyAndHeads[enemyID *2];
+		temp[i]->head = bodyAndHeads[(enemyID *2) + 1];
+		temp[i]->weapon = bodyAndHeads[(weaponID * 2)];
+		temp[i]->bullet = bodyAndHeads[(weaponID * 2) + 1];
+		
+		temp[i]->healthPoints = json_integer_value(json_object_get(enemyData, "HP"));
+		temp[i]->weaponDamage = json_integer_value(json_object_get(enemyData, "WEAPON_DAMAGE"));
+		temp[i]->rateOfFire = json_integer_value(json_object_get(enemyData, "SHOTS_PER_SECOND"));
+		temp[i]->noShots = json_integer_value(json_object_get(enemyData, "NO_BULLETS_PER_SHOT"));
+		temp[i]->speed = json_integer_value(json_object_get(enemyData, "SPEED"));
+		temp[i]->headOffsetX = json_integer_value(json_object_get(enemyData, "HEAD_OFFSET_X"));
+		temp[i]->headOffsetY = json_integer_value(json_object_get(enemyData, "HEAD_OFFSET_Y"));
+		temp[i]->weaponOffsetX = json_integer_value(json_object_get(enemyData, "WEAPON_OFFSET_X"));
+		temp[i]->weaponOffsetY = json_integer_value(json_object_get(enemyData, "WEAPON_OFFSET_Y"));
+		temp[i]->alive = SUCCESS;
+	}
+	
+	return temp;
+}
 
+
+gameObject *loadGame(SDL_Renderer *renderer, int *success)
+{
+	gameObject *temp = malloc(sizeof(gameObject));
+	/*
+	typedef struct
+	{
+	mapConstruct **maps;
+	basicEntity **allWeapons, **allEnemies, **allTiles;
+	basicCharacter *allEnemyData;
+
+	}gameObject;
+	*/
+	
+	temp->maps = malloc(sizeof( mapConstruct *) * NO_LEVELS);
+	temp->allTiles = loadTiles(renderer, success);
+	temp->allEnemies = loadEnemies(renderer, success);
+	temp->allWeapons = loadWeapons(renderer, success);
+	temp->maps[0] = loadMap(loadTextFile("ENKI.json", success), temp->allTiles[0]->tileDisplay, temp->allTiles[1]->tileDisplay, success);
+	temp->allEnemyData = loadEnemyStats(loadTextFile(ENEMY_FILE, success), temp->allEnemies, temp->allWeapons, success);
+	
+	/*
+	allTiles = loadTiles(mainRenderer, &succeededInit);
+	allEnemies = loadEnemies(mainRenderer, &succeededInit);
+	allWeapons = loadWeapons(mainRenderer, &succeededInit);
+	levelFile = loadTextFile("ENKI.json", &succeededInit);
+	testMap = loadMap(levelFile, allTiles[0]->tileDisplay, allTiles[1]->tileDisplay, &succeededInit);
+	allEnemyData = loadEnemyStats(loadTextFile(ENEMY_FILE, &succeededInit),allEnemies, allWeapons,  &succeededInit);
+	*/
+	return temp;
 }
