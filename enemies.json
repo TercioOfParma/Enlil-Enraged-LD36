@@ -1,12 +1,41 @@
 [
 	{
+	
+		"NO_ENEMIES" : 3
+	
+	},
+	{
+		"NAME": "WARRIOR_MALE_MELEE",
+		"BODY_ID" : 7,
+		"WEAPON_ID": 6,
+		"HP": 10,
+		"WEAPON_DAMAGE": 2,
+		"SHOTS_PER_SECOND": 4,
+		"NUMBER_OF_BULLETS_PER_SHOT": 1,
+		"LEVEL" : 2
 		
 	
 	},
 	
 	{
-	
-	
+		"NAME": "WARRIOR_MALE_RANGED",
+		"BODY_ID" : 7,
+		"WEAPON_ID": 0,
+		"HP": 10,
+		"WEAPON_DAMAGE": 2,
+		"SHOTS_PER_SECOND": 1,
+		"NUMBER_OF_BULLETS_PER_SHOT": 1,
+		"LEVEL" : 2
 	
 	}.
+	{
+		"NAME": "WARRIOR_FEMALE_RANGED",
+		"BODY_ID" : 3,
+		"WEAPON_ID": 0,
+		"HP": 10,
+		"WEAPON_DAMAGE": 1,
+		"SHOTS_PER_SECOND": 1,
+		"NUMBER_OF_BULLETS_PER_SHOT": 2,
+		"LEVEL" : 0
+	}
 ]

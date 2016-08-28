@@ -405,3 +405,98 @@ basicEntity **loadTiles(SDL_Renderer *renderer, int *success)
 	}
 	return tiles;
 }
+/*
+basicEntity **loadEnemies(SDL_Renderer *renderer, int *success)
+loads all the enemy components
+
+*/
+
+basicEntity **loadEnemies(SDL_Renderer *renderer, int *success)
+{
+	int i;
+	basicEntity **tiles = malloc( sizeof(basicEntity *) * ((NO_ENEMIES * 2) + 1));
+	char filename[1000];
+	for( i = 0; i < NO_ENEMIES; i++)
+	{
+		tiles[(i * 2)] = malloc( sizeof( basicEntity) );
+		sprintf( filename, "%s%sHEAD.png", SPRITE_DIR, ENEMY_NAMES[i]);
+		fprintf(stdout, "%s\n", filename);
+		tiles[(i *2)]->tileDisplay = loadImage( filename, renderer, &tiles[(i * 2)]->rectangle, success);
+		tiles[(i * 2) + 1] = malloc( sizeof( basicEntity) );
+		sprintf( filename, "%s%sBODY.png", SPRITE_DIR, ENEMY_NAMES[i]);
+		tiles[(i *2) + 1]->tileDisplay = loadImage( filename, renderer, &tiles[(i * 2) + 1]->rectangle, success);
+		tiles[(i *2) + 1]->tileWidth = tiles[(i * 2)]->rectangle.w / 2;//width of the tiles for animation
+	}
+	tiles[(i * 2)] = malloc( sizeof( basicEntity) );
+	sprintf( filename, "%sGIANT_OWL.png", SPRITE_DIR);
+	fprintf(stdout, "%s\n", filename);
+	//SDL_Texture *loadImage( const char *filename , SDL_Renderer *render , SDL_Rect *dimen , int *success );
+	tiles[(i *2)]->tileDisplay = loadImage( filename, renderer, &tiles[(i * 2)]->rectangle, success);
+	tiles[(i *2)]->tileWidth = tiles[(i * 2)]->rectangle.w / 2;
+	return tiles;
+}
+/*
+basicEntity **loadWeapons(SDL_Renderer *renderer, int *success)
+loads all the weapons components
+
+*/
+basicEntity **loadWeapons(SDL_Renderer *renderer, int *success)
+{
+int i;
+	basicEntity **tiles = malloc( sizeof(basicEntity *) * ((NO_WEAPONS * 2) + 1));
+	char filename[1000];
+	for( i = 0; i < NO_WEAPONS; i++)
+	{
+		tiles[(i * 2)] = malloc( sizeof( basicEntity) );
+		sprintf( filename, "%s%sGUN.png", SPRITE_DIR, WEAPON_NAMES[i]);
+		fprintf(stdout, "%s\n", filename);
+		//SDL_Texture *loadImage( const char *filename , SDL_Renderer *render , SDL_Rect *dimen , int *success );
+		tiles[(i *2)]->tileDisplay = loadImage( filename, renderer, &tiles[(i * 2)]->rectangle, success);
+		tiles[(i *2)]->tileWidth = tiles[(i * 2)]->rectangle.w / 2;
+		tiles[(i * 2) + 1] = malloc( sizeof( basicEntity) );
+		sprintf( filename, "%s%sAMMO.png", SPRITE_DIR, WEAPON_NAMES[i]);
+		fprintf(stdout, "%s\n", filename);
+		//SDL_Texture *loadImage( const char *filename , SDL_Renderer *render , SDL_Rect *dimen , int *success );
+		tiles[(i *2) + 1]->tileDisplay = loadImage( filename, renderer, &tiles[(i * 2) + 1]->rectangle, success);
+	}
+	tiles[(i * 2)] = malloc( sizeof( basicEntity) );
+	sprintf( filename, "%sSPEAR.png", SPRITE_DIR);
+	fprintf(stdout, "%s\n", filename);
+	//SDL_Texture *loadImage( const char *filename , SDL_Renderer *render , SDL_Rect *dimen , int *success );
+	tiles[(i *2)]->tileDisplay = loadImage( filename, renderer, &tiles[(i * 2)]->rectangle, success);
+	tiles[(i *2)]->tileWidth = tiles[(i * 2)]->rectangle.w / 2;
+	return tiles;
+}
+
+basicCharacter **loadEnemyStats(basicEntity **bodyAndHeads, basicEntity **weaponsAndAmmo, int *success)
+{
+	json_t *tempJsonHandle, *enemyData;
+	json_error_t errorHandle;
+	char *enemyFile = loadTextFile(ENEMY_FILE, success);
+	int i, noEnemies;
+	mapConstruct *map = malloc(sizeof(mapConstruct));
+	if(!map)
+	{
+		fprintf(stderr, "loadMap has failed: Unable to allocate memory for MapConstruct\n");
+		*success = FAIL;
+		return NULL;
+	}
+	tempJsonHandle = json_loads( enemyFile , 0 , &errorHandle );//loads the JSON file into Jansson 
+	if( !tempJsonHandle )
+	{
+		fprintf( stderr , "json_loads has failed : %s \n" , errorHandle.text );
+		*success = FAIL;
+		return NULL;
+	}
+	
+	enemyData = json_array_get( tempJsonHandle , 0 );
+	if( !json_is_object(enemyData) )//makes sure that what is being opened is actually a JSON object
+	{
+		fprintf( stderr , "json_object_get failed, didn't get an object\n" );
+		*success = FAIL;
+		json_decref( tempJsonHandle );
+		return NULL;
+	}
+	noEnemies = json_integer_value(json_object_get(enemyData, "NO_ENEMIES")) + 1;
+
+}

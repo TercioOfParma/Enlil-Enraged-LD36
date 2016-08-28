@@ -19,7 +19,8 @@ int main(int argc, char *argv[])
 	optionsData opt;
 	mapConstruct *testMap;
 	FILE *errorToFile = freopen(ERROR_LOG, "w", stderr);
-	basicEntity **allTiles;
+	basicEntity **allTiles, **allEnemies, **allWeapons;
+	playerCharacter *player = malloc( sizeof( playerCharacter ) );
 	SDL_Event events;
 	SDL_Rect cameraRect;
 	
@@ -32,6 +33,8 @@ int main(int argc, char *argv[])
 	mainRenderer = createRenderer(mainWindow, &succeededInit);
 	mainFont = loadFont( &opt, &succeededInit);
 	allTiles = loadTiles(mainRenderer, &succeededInit);
+	allEnemies = loadEnemies(mainRenderer, &succeededInit);
+	allWeapons = loadWeapons(mainRenderer, &succeededInit);
 	levelFile = loadTextFile("ENKI.json", &succeededInit);
 	testMap = loadMap(levelFile, allTiles[0]->tileDisplay, allTiles[1]->tileDisplay, &succeededInit);
 	
@@ -61,5 +64,6 @@ int main(int argc, char *argv[])
 	}
 	endSDL(mainRenderer, mainWindow, mainFont);
 	free(testMap);
+	fclose(stderr);
 	return 0;
 }
