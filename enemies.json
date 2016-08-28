@@ -1,8 +1,6 @@
 [
 	{
-	
 		"NO_ENEMIES" : 3
-	
 	},
 	{
 		"NAME": "WARRIOR_MALE_MELEE",
@@ -11,8 +9,13 @@
 		"HP": 10,
 		"WEAPON_DAMAGE": 2,
 		"SHOTS_PER_SECOND": 4,
-		"NUMBER_OF_BULLETS_PER_SHOT": 1,
-		"LEVEL" : 2
+		"NO_BULLETS_PER_SHOT": 1,
+		"SPEED": 5,
+		"LEVEL" : 2,
+		"HEAD_OFFSET_X": 20,
+		"HEAD_OFFSET_Y": 20,
+		"BODY_OFFSET_X": 20,
+		"BODY_OFFSET_Y": 20
 		
 	
 	},
@@ -24,10 +27,15 @@
 		"HP": 10,
 		"WEAPON_DAMAGE": 2,
 		"SHOTS_PER_SECOND": 1,
-		"NUMBER_OF_BULLETS_PER_SHOT": 1,
-		"LEVEL" : 2
+		"NO_BULLETS_PER_SHOT": 1,
+		"SPEED": 5,
+		"LEVEL" : 2,
+		"HEAD_OFFSET_X": 20,
+		"HEAD_OFFSET_Y": 20,
+		"BODY_OFFSET_X": 20,
+		"BODY_OFFSET_Y": 20
 	
-	}.
+	},
 	{
 		"NAME": "WARRIOR_FEMALE_RANGED",
 		"BODY_ID" : 3,
@@ -35,7 +43,12 @@
 		"HP": 10,
 		"WEAPON_DAMAGE": 1,
 		"SHOTS_PER_SECOND": 1,
-		"NUMBER_OF_BULLETS_PER_SHOT": 2,
-		"LEVEL" : 0
+		"NO_BULLETS_PER_SHOT": 2,
+		"SPEED": 6,
+		"LEVEL" : 0,
+		"HEAD_OFFSET_X": 20,
+		"HEAD_OFFSET_Y": 20,
+		"BODY_OFFSET_X": 20,
+		"BODY_OFFSET_Y": 20
 	}
 ]

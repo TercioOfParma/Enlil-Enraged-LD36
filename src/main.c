@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	TTF_Font *mainFont;
 	optionsData opt;
 	mapConstruct *testMap;
-	//FILE *errorToFile = freopen(ERROR_LOG, "w", stderr);
+	FILE *errorToFile = freopen(ERROR_LOG, "w", stderr);
 	gameObject *construct;
 	playerCharacter *player = malloc( sizeof( playerCharacter ) );
 	SDL_Event events;

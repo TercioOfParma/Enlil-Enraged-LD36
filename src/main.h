@@ -92,7 +92,7 @@ typedef struct
 {
 	basicEntity *base, *head, *weapon, *bullet;
 	int healthPoints, weaponDamage, rateOfFire, noShots, speed, alive;
-	int headOffsetX , headOffsetY , weaponOffsetX, weaponOffsetY, weaponType, spawnLevel;
+	int headOffsetX , headOffsetY , weaponOffsetX, weaponOffsetY, weaponType, spawnLevel, noEnemies;
 }basicCharacter;
 
 typedef struct
@@ -106,7 +106,7 @@ typedef struct
 {
 	mapConstruct **maps;
 	basicEntity **allWeapons, **allEnemies, **allTiles;
-	basicCharacter **allEnemyData;
+	basicCharacter **allEnemyData, **currentEnemies;
 
 }gameObject;
 
@@ -125,9 +125,10 @@ basicEntity **loadTiles(SDL_Renderer *renderer, int *success);
 basicEntity **loadEnemies(SDL_Renderer *renderer, int *success);
 basicEntity **loadWeapons(SDL_Renderer *renderer, int *success);
 basicCharacter **loadEnemyStats(char *enemyFile, basicEntity **bodyAndHeads, basicEntity **weaponsAndAmmo, int *success);
-basicCharacter *spawnCharacter( mapConstruct *map, basicEntity *body, basicEntity *head, basicEntity *weapon, basicEntity *bullet );
-
+basicCharacter *spawnCharacter( gameObject *game, int levelNumber,  int *success );
 gameObject *loadGame(SDL_Renderer *renderer, int *success);
+int checkCollisionWithMapEntity(basicEntity *body, mapConstruct *map);
+
 //===== DEINIT ======
 void endSDL( SDL_Renderer *render , SDL_Window *screen , TTF_Font *font );
 

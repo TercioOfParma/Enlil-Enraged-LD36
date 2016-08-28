@@ -499,10 +499,10 @@ basicCharacter **loadEnemyStats(char *enemyFile, basicEntity **bodyAndHeads, bas
 		return NULL;
 	}
 	
-	for(i = 1; i < noEnemies; i++)
+	for(i = 0; i < noEnemies - 1; i++)
 	{
 		temp[i] = malloc(sizeof(basicCharacter));
-		enemyData = json_array_get(enemyDataFileArray, i);
+		enemyData = json_array_get(enemyDataFileArray, i + 1);
 		if( !json_is_object(enemyData) )//makes sure that what is being opened is actually a JSON object
 		{
 			fprintf( stderr , "json_object_get failed, didn't get an object\n" );
@@ -516,8 +516,8 @@ basicCharacter **loadEnemyStats(char *enemyFile, basicEntity **bodyAndHeads, bas
 		
 		temp[i]->base = bodyAndHeads[enemyID *2];
 		temp[i]->head = bodyAndHeads[(enemyID *2) + 1];
-		temp[i]->weapon = bodyAndHeads[(weaponID * 2)];
-		temp[i]->bullet = bodyAndHeads[(weaponID * 2) + 1];
+		temp[i]->weapon = weaponsAndAmmo[(weaponID * 2)];
+		temp[i]->bullet = weaponsAndAmmo[(weaponID * 2) + 1];
 		
 		temp[i]->healthPoints = json_integer_value(json_object_get(enemyData, "HP"));
 		temp[i]->weaponDamage = json_integer_value(json_object_get(enemyData, "WEAPON_DAMAGE"));
@@ -529,24 +529,20 @@ basicCharacter **loadEnemyStats(char *enemyFile, basicEntity **bodyAndHeads, bas
 		temp[i]->weaponOffsetX = json_integer_value(json_object_get(enemyData, "WEAPON_OFFSET_X"));
 		temp[i]->weaponOffsetY = json_integer_value(json_object_get(enemyData, "WEAPON_OFFSET_Y"));
 		temp[i]->alive = SUCCESS;
+		temp[i]->noEnemies = noEnemies;
 	}
 	
 	return temp;
 }
+/*
+gameObject *loadGame(SDL_Renderer *renderer, int *success):
+Loads all the data for the game
 
+*/
 
 gameObject *loadGame(SDL_Renderer *renderer, int *success)
 {
 	gameObject *temp = malloc(sizeof(gameObject));
-	/*
-	typedef struct
-	{
-	mapConstruct **maps;
-	basicEntity **allWeapons, **allEnemies, **allTiles;
-	basicCharacter *allEnemyData;
-
-	}gameObject;
-	*/
 	
 	temp->maps = malloc(sizeof( mapConstruct *) * NO_LEVELS);
 	temp->allTiles = loadTiles(renderer, success);
@@ -554,14 +550,90 @@ gameObject *loadGame(SDL_Renderer *renderer, int *success)
 	temp->allWeapons = loadWeapons(renderer, success);
 	temp->maps[0] = loadMap(loadTextFile("ENKI.json", success), temp->allTiles[0]->tileDisplay, temp->allTiles[1]->tileDisplay, success);
 	temp->allEnemyData = loadEnemyStats(loadTextFile(ENEMY_FILE, success), temp->allEnemies, temp->allWeapons, success);
+	temp->currentEnemies = malloc(sizeof(basicCharacter *) * 1);
+	temp->currentEnemies[0] = spawnCharacter( temp, 0, success);
 	
-	/*
-	allTiles = loadTiles(mainRenderer, &succeededInit);
-	allEnemies = loadEnemies(mainRenderer, &succeededInit);
-	allWeapons = loadWeapons(mainRenderer, &succeededInit);
-	levelFile = loadTextFile("ENKI.json", &succeededInit);
-	testMap = loadMap(levelFile, allTiles[0]->tileDisplay, allTiles[1]->tileDisplay, &succeededInit);
-	allEnemyData = loadEnemyStats(loadTextFile(ENEMY_FILE, &succeededInit),allEnemies, allWeapons,  &succeededInit);
-	*/
 	return temp;
+}
+
+
+basicCharacter *spawnCharacter( gameObject *game, int levelNumber,  int *success )
+{
+	basicCharacter *temp = malloc(sizeof(basicCharacter));
+	int characterNumber;
+	int successGenerated = FAIL;
+	fprintf(stdout, " Number of Enemies: %d\n", game->allEnemyData[0]->noEnemies);
+	do
+	{
+		characterNumber = rand() % game->allEnemyData[0]->noEnemies;
+		fprintf(stdout, " Generated Value: %d\n", characterNumber);
+		if(characterNumber >= game->allEnemyData[0]->noEnemies)
+		{
+			characterNumber = game->allEnemyData[0]->noEnemies - 1;
+	
+		}
+	}while(game->allEnemyData[characterNumber]->spawnLevel != levelNumber);
+	
+	//We want to copy the textures and their dimensions only
+	temp->base->tileDisplay = game->allEnemyData[characterNumber]->base->tileDisplay;
+	temp->base->rectangle.w = game->allEnemyData[characterNumber]->base->rectangle.w ;
+	temp->base->rectangle.h = game->allEnemyData[characterNumber]->base->rectangle.h ;
+	temp->head->tileDisplay = game->allEnemyData[characterNumber]->head->tileDisplay;
+	temp->head->rectangle.w = game->allEnemyData[characterNumber]->head->rectangle.w ;
+	temp->head->rectangle.h = game->allEnemyData[characterNumber]->head->rectangle.h ;
+	temp->weapon->tileDisplay = game->allEnemyData[characterNumber]->weapon->tileDisplay;
+	//temp->weapon->rectangle.w = game->allEnemyData[characterNumber]->weapon->rectangle.w ;
+	//temp->weapon->rectangle.h = game->allEnemyData[characterNumber]->weapon->rectangle.h ;
+	//temp->bullet->tileDisplay = game->allEnemyData[characterNumber]->bullet->tileDisplay;
+	//temp->bullet->rectangle.w = game->allEnemyData[characterNumber]->bullet->rectangle.w ;
+	//temp->bullet->rectangle.h = game->allEnemyData[characterNumber]->bullet->rectangle.h ;
+	/*
+	do
+	{
+		temp->base->rectangle.x = rand() % game->maps[levelNumber]->xSize * TILE_SIZE;
+		temp->base->rectangle.y = rand() % game->maps[levelNumber]->ySize * TILE_SIZE;
+		successGenerated = checkCollisionWithMapEntity(temp->base, game->maps[levelNumber]);
+	
+	}while(successGenerated == FAIL);
+	
+	temp->weapon->rectangle.x = temp->weapon->rectangle.x + game->allEnemyData[characterNumber]->weaponOffsetX;
+	temp->weapon->rectangle.y = temp->weapon->rectangle.y + game->allEnemyData[characterNumber]->weaponOffsetY;
+	temp->head->rectangle.y = temp->head->rectangle.y + game->allEnemyData[characterNumber]->headOffsetY;
+	temp->head->rectangle.x = temp->head->rectangle.x + game->allEnemyData[characterNumber]->headOffsetX;
+	
+	temp->healthPoints = game->allEnemyData[characterNumber]->healthPoints;
+	temp->weaponDamage = game->allEnemyData[characterNumber]->weaponDamage;
+	temp->rateOfFire = game->allEnemyData[characterNumber]->rateOfFire;
+	temp->noShots = game->allEnemyData[characterNumber]->noShots;
+	temp->speed = game->allEnemyData[characterNumber]->speed;
+	temp->alive = game->allEnemyData[characterNumber]->alive;
+	/*typedef struct
+	{
+		basicEntity *base, *head, *weapon, *bullet;
+		int healthPoints, weaponDamage, rateOfFire, noShots, speed, alive;
+		int headOffsetX , headOffsetY , weaponOffsetX, weaponOffsetY, weaponType, spawnLevel;
+	}basicCharacter;
+	*/
+	
+	return temp;
+}
+
+
+int checkCollisionWithMapEntity(basicEntity *body, mapConstruct *map)
+{
+	int i, total;
+	total = map->xSize * map->ySize;
+	
+	for(i = 0; i < total; i++)
+	{
+		if(SDL_HasIntersection(&body->rectangle, &map->mapDetails[i]->rectangle) == SDL_TRUE)
+		{
+			return FAIL;
+		
+		}
+	
+	}
+
+
+	return SUCCESS;
 }

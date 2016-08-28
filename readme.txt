@@ -1,0 +1,2 @@
+﻿I have decided to make this a more long term project since I cannot see the three day limit being enough to achieve the goals I intend for the game to have. I am not giving up, I just think that
+the timings are a little bit restrictive to do anything good in, especially in C.

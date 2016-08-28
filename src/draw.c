@@ -27,5 +27,3 @@ void drawMap(mapConstruct *toDraw, SDL_Renderer *render, SDL_Rect camera, option
 
 
 }
-
-//((0 - opt->SCREEN_WIDTH / 2) + x > 0 || opt->SCREEN_WIDTH / 2 + x < opt->SCREEN_WIDTH) && ((0 - opt->SCREEN_HEIGHT / 2) + y > 0 || opt->SCREEN_HEIGHT / 2 + y < opt->SCREEN_WIDTH )
